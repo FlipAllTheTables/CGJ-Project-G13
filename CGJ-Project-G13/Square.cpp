@@ -7,8 +7,7 @@ void Square::draw() {
 
     glUniformMatrix4fv(this->MatrixId, 1, GL_FALSE, glm::value_ptr(this->transform));
     glUniform4fv(this->ColorId, 1, glm::value_ptr(this->color));
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid*>(0));
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid*>(3));
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid*>(0));
 
     glBindVertexArray(0);
     return;
