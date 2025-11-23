@@ -231,7 +231,7 @@ int main(int argc, char* argv[]) {
     mgl::Engine& engine = mgl::Engine::getInstance();
     engine.setApp(new MyApp());
     engine.setOpenGL(4, 6);
-    engine.setWindow(600, 600, "Epic Sea Dinosaur Time", 0, 1);
+    engine.setWindow(600, 600, "Hello Modern 2D World", 0, 1);
     engine.init();
     engine.run();
     exit(EXIT_SUCCESS);
