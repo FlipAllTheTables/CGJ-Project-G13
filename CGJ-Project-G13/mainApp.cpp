@@ -129,21 +129,80 @@ void MyApp::destroyBufferObjects() {
 }
 
 void MyApp::createShapes() {
+    /*
+    The order of operations for matrix transformations is that the last transformation in code is the first applied.
+    Eg. the large blue triangle first rotates -135 degrees around Z axis, then translates, then scales, etc...
+    To create the tangram shape, first step is to scale pieces appropriately (if needed), then rotate them (if needed), then translate them.
+    This ensures that all the pieces are in the correct position relative to each other.
+    Once this is done, there is an additional scaling, rotation and translation done on the figure.
+    Scaling and translation are done to ensure all pieces fit cleanly in clipspace.
+    The rotation is done in order to tilt the entire "Sea Dinosaur" shape slightly upwards.
+    */
+
+    // Large blue triangle
     std::unique_ptr<Triangle> t1 = std::make_unique<Triangle>(VaoId[0], glm::vec3((15.0 / 255), (130.0 / 255), (242.0 / 255)), MatrixId, ColorId);
-    t1->translate(glm::vec3(-0.5, 0.5f, 0));
-    t1->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    t1->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    t1->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    t1->translate(glm::vec3(std::sqrt(2) / 2, -std::sqrt(2) / 2, 0));
     t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -135.0f);
+
+    // Large magenta triangle
     std::unique_ptr<Triangle> t2 = std::make_unique<Triangle>(VaoId[0], glm::vec3((205.0 / 255), (14.0 / 255), (102.0 / 255)), MatrixId, ColorId);
+    t2->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    t2->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    t2->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    t2->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
+
+    // Medium purple triangle
     std::unique_ptr<Triangle> t3 = std::make_unique<Triangle>(VaoId[0], glm::vec3((109.0 / 255), (59.0 / 255), (191.0 / 255)), MatrixId, ColorId);
+    t3->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    t3->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    t3->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    t3->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 4, 0.0f));
+    t3->scale(glm::vec3(std::sqrt(2) / 2, std::sqrt(2) / 2, 0.0f));
+
+    // Small teal triangle
     std::unique_ptr<Triangle> t4 = std::make_unique<Triangle>(VaoId[0], glm::vec3((0.0 / 255), (158.0 / 255), (166.0 / 255)), MatrixId, ColorId);
+    t4->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    t4->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    t4->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    t4->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 2, 0.0f));
+    t4->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
+    t4->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+
+    // Small orange triangle
     std::unique_ptr<Triangle> t5 = std::make_unique<Triangle>(VaoId[0], glm::vec3((235.0 / 255), (71.0 / 255), (38.0 / 255)), MatrixId, ColorId);
+    t5->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    t5->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    t5->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    t5->translate(glm::vec3(-sqrt(2) / 2 - 1.25f, 0.25f, 0.0f));
+    t5->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
+    t5->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+
+    // Green square
     std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3((34.0 / 255), (171.0 / 255), (36.0 / 255)), MatrixId, ColorId);
-    s->translate(glm::vec3(-0.5, -0.5, 0));
-    s->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    s->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    s->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    s->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    s->translate(glm::vec3(-sqrt(2) / 2 - 0.75f, 0.25f, 0.0f));
+    s->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+
+    // Orange parallelogram
     std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3((253.0 / 255), (140.0 / 255), (0.0 / 255)), MatrixId, ColorId);
-    p->translate(glm::vec3(0.5, 0, 0));
-    p->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    p->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    p->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
+    p->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    p->translate(glm::vec3(-sqrt(2) / 2 - 0.25f, 0.0f, 0.0f));
+    p->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
+    p->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+
+    // Add all pieces to shapes array
     this->shapes.push_back(std::move(t1));
+    this->shapes.push_back(std::move(t2));
+    this->shapes.push_back(std::move(t3));
+    this->shapes.push_back(std::move(t4));
+    this->shapes.push_back(std::move(t5));
     this->shapes.push_back(std::move(s));
     this->shapes.push_back(std::move(p));
 }
