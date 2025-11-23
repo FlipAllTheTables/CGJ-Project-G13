@@ -80,9 +80,9 @@ typedef struct {
 
 // vertices[0] = Triangle; vertices[0] = Square; vertices[0] = Parallelogram; 
 const std::vector<std::vector<Vertex>> Vertices = {
-    { {0.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
-    { {0.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
-    { {0.0f, 0.0f, 0.0f, 1.0f}, {(float) (std::sqrt(2)/2.0), (float) (-std::sqrt(2)/2.0), 0.0f, 1.0f}, {(float)std::sqrt(2), 0.0f, 0.0f, 1.0f}, {(float) (3.0 * std::sqrt(2) / 2.0), (float) (-std::sqrt(2)/2.0), 0.0f, 1.0f}}
+    { {-0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, -0.5f, 0.0f, 1.0f}, {-0.5f, 0.5f, 0.0f, 1.0f} },
+    { {-0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, 0.5f, 0.0f, 1.0f}, {-0.5f, 0.5f, 0.0f, 1.0f} },
+    { {-1.0f, -0.5f, 0.0f, 1.0f}, {0.0f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.5f, 0.0f, 1.0f}, {1.0f, 0.5f, 0.0f, 1.0f}}
 };
 
 const std::vector<std::vector<GLubyte>> Indices = {
@@ -129,16 +129,21 @@ void MyApp::destroyBufferObjects() {
 }
 
 void MyApp::createShapes() {
-    std::unique_ptr<Triangle> t = std::make_unique<Triangle>(VaoId[0], glm::vec3(1.0f, 0.0f, 0.0f), MatrixId, ColorId);
-    t->translate(glm::vec3(-0.75, 0.25, 0));
-    t->scale(glm::vec3(0.5f, 0.5f, 0.5f));
-    std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3(0.0f, 1.0f, 0.0f), MatrixId, ColorId);
-    s->translate(glm::vec3(-0.75, -0.75, 0));
+    std::unique_ptr<Triangle> t1 = std::make_unique<Triangle>(VaoId[0], glm::vec3((15.0 / 255), (130.0 / 255), (242.0 / 255)), MatrixId, ColorId);
+    t1->translate(glm::vec3(-0.5, 0.5f, 0));
+    t1->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -135.0f);
+    std::unique_ptr<Triangle> t2 = std::make_unique<Triangle>(VaoId[0], glm::vec3((205.0 / 255), (14.0 / 255), (102.0 / 255)), MatrixId, ColorId);
+    std::unique_ptr<Triangle> t3 = std::make_unique<Triangle>(VaoId[0], glm::vec3((109.0 / 255), (59.0 / 255), (191.0 / 255)), MatrixId, ColorId);
+    std::unique_ptr<Triangle> t4 = std::make_unique<Triangle>(VaoId[0], glm::vec3((0.0 / 255), (158.0 / 255), (166.0 / 255)), MatrixId, ColorId);
+    std::unique_ptr<Triangle> t5 = std::make_unique<Triangle>(VaoId[0], glm::vec3((235.0 / 255), (71.0 / 255), (38.0 / 255)), MatrixId, ColorId);
+    std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3((34.0 / 255), (171.0 / 255), (36.0 / 255)), MatrixId, ColorId);
+    s->translate(glm::vec3(-0.5, -0.5, 0));
     s->scale(glm::vec3(0.5f, 0.5f, 0.5f));
-    std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3(0.0f, 0.0f, 1.0f), MatrixId, ColorId);
-    p->translate(glm::vec3(-0.1, 0, 0));
+    std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3((253.0 / 255), (140.0 / 255), (0.0 / 255)), MatrixId, ColorId);
+    p->translate(glm::vec3(0.5, 0, 0));
     p->scale(glm::vec3(0.5f, 0.5f, 0.5f));
-    this->shapes.push_back(std::move(t));
+    this->shapes.push_back(std::move(t1));
     this->shapes.push_back(std::move(s));
     this->shapes.push_back(std::move(p));
 }
@@ -147,13 +152,11 @@ void MyApp::createShapes() {
 
 void MyApp::drawScene() {
     // Drawing directly in clip space
-    glBindVertexArray(this->VaoId[0]);
     Shaders->bind();
     for (auto& shape : shapes) {
         shape->draw();
     }
     Shaders->unbind();
-    glBindVertexArray(0);
 }
 
 ////////////////////////////////////////////////////////////////////// CALLBACKS

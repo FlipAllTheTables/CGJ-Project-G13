@@ -1,9 +1,7 @@
 #version 330 core
 
-layout(location = 0) in vec4 inPosition;
+in vec4 inPosition;
 
-// in vec4 inPosition;
-// in vec4 inColor;
 out vec4 exColor;
 
 uniform mat4 Matrix;
