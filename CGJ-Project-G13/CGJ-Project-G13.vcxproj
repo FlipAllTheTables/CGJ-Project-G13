@@ -142,6 +142,16 @@ xcopy /y $(SolutionDir)libs\glfw\lib-vc2022\glfw3.dll $(OutDir)</Command>
     <ClCompile Include="mglApp.cpp" />
     <ClCompile Include="mglError.cpp" />
     <ClCompile Include="mglShader.cpp" />
+    <ClCompile Include="Parallelogram.cpp" />
+    <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="Square.cpp" />
+    <ClCompile Include="Triangle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Parallelogram.hpp" />
+    <ClInclude Include="Shape.hpp" />
+    <ClInclude Include="Square.hpp" />
+    <ClInclude Include="Triangle.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

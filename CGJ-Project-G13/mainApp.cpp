@@ -21,6 +21,12 @@
 #include <memory>
 
 #include "../mgl/mgl.hpp"
+#include "./Shape.hpp"
+#include "./Triangle.hpp"
+#include "./Square.hpp"
+#include "./Parallelogram.hpp"
+#include <vector>
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////// MYAPP
 
@@ -36,14 +42,16 @@ public:
 
 private:
     const GLuint POSITION = 0, COLOR = 1;
-    GLuint VaoId, VboId[2];
+    GLuint VaoId[3], VboId[6];
+    int N_SHAPES = 3;
+    std::vector<std::unique_ptr<Shape>> shapes;
     std::unique_ptr<mgl::ShaderProgram> Shaders = nullptr;
-    GLint MatrixId;
-
+    GLint MatrixId, ColorId;
     void createShaderProgram();
     void createBufferObjects();
     void destroyBufferObjects();
     void drawScene();
+    void createShapes();
 };
 
 //////////////////////////////////////////////////////////////////////// SHADERs
@@ -56,83 +64,94 @@ void MyApp::createShaderProgram() {
     Shaders->addAttribute(mgl::POSITION_ATTRIBUTE, POSITION);
     Shaders->addAttribute(mgl::COLOR_ATTRIBUTE, COLOR);
     Shaders->addUniform("Matrix");
+    Shaders->addUniform("Color");
 
     Shaders->create();
 
     MatrixId = Shaders->Uniforms["Matrix"].index;
+    ColorId = Shaders->Uniforms["Color"].index;
 }
 
 //////////////////////////////////////////////////////////////////// VAOs & VBOs
 
 typedef struct {
     GLfloat XYZW[4];
-    GLfloat RGBA[4];
 } Vertex;
 
-const Vertex Vertices[] = {
-    {{0.25f, 0.25f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-    {{0.75f, 0.25f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-    {{0.50f, 0.75f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}} };
+// vertices[0] = Triangle; vertices[0] = Square; vertices[0] = Parallelogram; 
+const std::vector<std::vector<Vertex>> Vertices = {
+    { {0.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
+    { {0.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
+    { {0.0f, 0.0f, 0.0f, 1.0f}, {(float) (std::sqrt(2)/2.0), (float) (-std::sqrt(2)/2.0), 0.0f, 1.0f}, {(float)std::sqrt(2), 0.0f, 0.0f, 1.0f}, {(float) (3.0 * std::sqrt(2) / 2.0), (float) (-std::sqrt(2)/2.0), 0.0f, 1.0f}}
+};
 
-const GLubyte Indices[] = { 0, 1, 2 };
+const std::vector<std::vector<GLubyte>> Indices = {
+    { {0, 1, 2} },
+    { {0, 1, 2, 0, 2, 3} },
+    { {0, 1, 2, 1, 3, 2} }
+};
 
 void MyApp::createBufferObjects() {
-    glGenVertexArrays(1, &VaoId);
-    glBindVertexArray(VaoId);
-    {
-        glGenBuffers(2, VboId);
+    glGenVertexArrays(3, VaoId);
+    glGenBuffers(6, VboId);
+    for (int i = 0; i < N_SHAPES; i++) {
+        glBindVertexArray(VaoId[i]);
+        {
+            glBindBuffer(GL_ARRAY_BUFFER, VboId[2*i]);
+            {
+                glBufferData(GL_ARRAY_BUFFER, Vertices[i].size() * sizeof(Vertex), Vertices[i].data(), GL_STATIC_DRAW);
+                glEnableVertexAttribArray(POSITION);
+                glVertexAttribPointer(POSITION, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                    reinterpret_cast<GLvoid*>(0));
 
-        glBindBuffer(GL_ARRAY_BUFFER, VboId[0]);
-        {
-            glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-            glEnableVertexAttribArray(POSITION);
-            glVertexAttribPointer(POSITION, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                reinterpret_cast<GLvoid*>(0));
-            glEnableVertexAttribArray(COLOR);
-            glVertexAttribPointer(
-                COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                reinterpret_cast<GLvoid*>(sizeof(Vertices[0].XYZW)));
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[2*i+1]);
+                {
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices[i].size() * sizeof(GLubyte), Indices[i].data(),
+                        GL_STATIC_DRAW);
+                }
+            }
         }
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[1]);
-        {
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices,
-                GL_STATIC_DRAW);
-        }
+        glBindVertexArray(0);
     }
-    glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDeleteBuffers(2, VboId);
+    glDeleteBuffers(6, VboId);
 }
 
 void MyApp::destroyBufferObjects() {
-    glBindVertexArray(VaoId);
-    glDisableVertexAttribArray(POSITION);
-    glDisableVertexAttribArray(COLOR);
-    glDeleteVertexArrays(1, &VaoId);
-    glBindVertexArray(0);
+    for (int i = 0; i < 1; i++) {
+        glBindVertexArray(VaoId[i]);
+        glDisableVertexAttribArray(POSITION);
+        glDisableVertexAttribArray(COLOR);
+        glDeleteVertexArrays(1, &VaoId[i]);
+        glBindVertexArray(0);
+    }
+}
+
+void MyApp::createShapes() {
+    std::unique_ptr<Triangle> t = std::make_unique<Triangle>(VaoId[0], glm::vec3(1.0f, 0.0f, 0.0f), MatrixId, ColorId);
+    t->translate(glm::vec3(-0.75, 0.25, 0));
+    t->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3(0.0f, 1.0f, 0.0f), MatrixId, ColorId);
+    s->translate(glm::vec3(-0.75, -0.75, 0));
+    s->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3(0.0f, 0.0f, 1.0f), MatrixId, ColorId);
+    p->translate(glm::vec3(-0.1, 0, 0));
+    p->scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    this->shapes.push_back(std::move(t));
+    this->shapes.push_back(std::move(s));
+    this->shapes.push_back(std::move(p));
 }
 
 ////////////////////////////////////////////////////////////////////////// SCENE
 
-const glm::mat4 I(1.0f);
-const glm::mat4 M =
-glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, -1.0f, 0.0f));
-
 void MyApp::drawScene() {
     // Drawing directly in clip space
-
-    glBindVertexArray(VaoId);
+    glBindVertexArray(this->VaoId[0]);
     Shaders->bind();
-
-    glUniformMatrix4fv(MatrixId, 1, GL_FALSE, glm::value_ptr(I));
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE,
-        reinterpret_cast<GLvoid*>(0));
-
-    glUniformMatrix4fv(MatrixId, 1, GL_FALSE, glm::value_ptr(M));
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE,
-        reinterpret_cast<GLvoid*>(0));
-
+    for (auto& shape : shapes) {
+        shape->draw();
+    }
     Shaders->unbind();
     glBindVertexArray(0);
 }
@@ -142,6 +161,7 @@ void MyApp::drawScene() {
 void MyApp::initCallback(GLFWwindow* win) {
     createBufferObjects();
     createShaderProgram();
+    createShapes();
 }
 
 void MyApp::windowCloseCallback(GLFWwindow* win) { destroyBufferObjects(); }
