@@ -13,11 +13,12 @@ void Shape::translate(const glm::vec3& delta) {
 }
 
 void Shape::scale(const glm::vec3& scale) {
-	this->transform = glm::scale(Shape::transform, scale);
+	this->transform = glm::scale(this->transform, scale);
 }
 
 // TODO: Implement using quaternions?
 void Shape::rotate(const glm::vec3& axis, float angle) {
 	float rad = glm::radians(angle);
-	this->transform = glm::rotate(this->transform, angle, axis);
+	glm::vec3 normAxis = glm::normalize(axis);
+	this->transform = glm::rotate(this->transform, rad, normAxis);
 }
