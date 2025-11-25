@@ -1,14 +1,5 @@
 #include "./Parallelogram.hpp"
 
-Parallelogram::Parallelogram(GLuint VAO, glm::vec3 color, GLint MatrixId, GLint ColorId, glm::mat4 transform) : Shape(VAO, color, MatrixId, ColorId, transform) {}
+Parallelogram::Parallelogram(GLint MatrixId, GLint ColorId) :
+	Shape(MatrixId, ColorId, { {-1.0f, -0.5f, 0.0f, 1.0f}, {0.0f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.5f, 0.0f, 1.0f}, {1.0f, 0.5f, 0.0f, 1.0f} }, { {0, 1, 2, 1, 3, 2} }) {}
 
-void Parallelogram::draw() {
-    glBindVertexArray(this->VAO);
-    
-    glUniformMatrix4fv(this->MatrixId, 1, GL_FALSE, glm::value_ptr(this->transform));
-    glUniform4fv(this->ColorId, 1, glm::value_ptr(this->color));
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid*>(0));
-
-    glBindVertexArray(0);
-    return;
-}

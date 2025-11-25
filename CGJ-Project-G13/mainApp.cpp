@@ -41,17 +41,17 @@ public:
     void windowSizeCallback(GLFWwindow* win, int width, int height) override;
 
 private:
+    Triangle *triangle;
+    Square *square;
+    Parallelogram *parallelogram;
     const GLuint POSITION = 0, COLOR = 1;
-    GLuint VaoId[3], VboId[6];
-    int N_SHAPES = 3;
-    std::vector<std::unique_ptr<Shape>> shapes;
     std::unique_ptr<mgl::ShaderProgram> Shaders = nullptr;
     GLint MatrixId, ColorId;
     void createShaderProgram();
     void createBufferObjects();
     void destroyBufferObjects();
     void drawScene();
-    void createShapes();
+    void createTransformations();
 };
 
 //////////////////////////////////////////////////////////////////////// SHADERs
@@ -74,61 +74,26 @@ void MyApp::createShaderProgram() {
 
 //////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-typedef struct {
-    GLfloat XYZW[4];
-} Vertex;
-
-// vertices[0] = Triangle; vertices[0] = Square; vertices[0] = Parallelogram; 
-const std::vector<std::vector<Vertex>> Vertices = {
-    { {-0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, -0.5f, 0.0f, 1.0f}, {-0.5f, 0.5f, 0.0f, 1.0f} },
-    { {-0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, -0.5f, 0.0f, 1.0f}, {0.5f, 0.5f, 0.0f, 1.0f}, {-0.5f, 0.5f, 0.0f, 1.0f} },
-    { {-1.0f, -0.5f, 0.0f, 1.0f}, {0.0f, -0.5f, 0.0f, 1.0f}, {0.0f, 0.5f, 0.0f, 1.0f}, {1.0f, 0.5f, 0.0f, 1.0f}}
-};
-
-const std::vector<std::vector<GLubyte>> Indices = {
-    { {0, 1, 2} },
-    { {0, 1, 2, 0, 2, 3} },
-    { {0, 1, 2, 1, 3, 2} }
-};
-
 void MyApp::createBufferObjects() {
-    glGenVertexArrays(3, VaoId);
-    glGenBuffers(6, VboId);
-    for (int i = 0; i < N_SHAPES; i++) {
-        glBindVertexArray(VaoId[i]);
-        {
-            glBindBuffer(GL_ARRAY_BUFFER, VboId[2*i]);
-            {
-                glBufferData(GL_ARRAY_BUFFER, Vertices[i].size() * sizeof(Vertex), Vertices[i].data(), GL_STATIC_DRAW);
-                glEnableVertexAttribArray(POSITION);
-                glVertexAttribPointer(POSITION, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                    reinterpret_cast<GLvoid*>(0));
-
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[2*i+1]);
-                {
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices[i].size() * sizeof(GLubyte), Indices[i].data(),
-                        GL_STATIC_DRAW);
-                }
-            }
-        }
-        glBindVertexArray(0);
-    }
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDeleteBuffers(6, VboId);
+    triangle = new Triangle(MatrixId, ColorId);
+    square = new Square(MatrixId, ColorId);
+    parallelogram = new Parallelogram(MatrixId, ColorId);
 }
 
 void MyApp::destroyBufferObjects() {
-    for (int i = 0; i < 1; i++) {
-        glBindVertexArray(VaoId[i]);
-        glDisableVertexAttribArray(POSITION);
-        glDisableVertexAttribArray(COLOR);
-        glDeleteVertexArrays(1, &VaoId[i]);
-        glBindVertexArray(0);
-    }
+    triangle->destroyBufferObjects();
+    square->destroyBufferObjects();
+    parallelogram->destroyBufferObjects();
+    delete triangle;
+    delete square;
+    delete parallelogram;
 }
 
-void MyApp::createShapes() {
+//////////////////////////////////////////////////////////////////// MATRICES
+
+
+
+void MyApp::createTransformations() {
     /*
     The first transformation in code is the first transformation applied to a piece.
     Eg. the large blue triangle first rotates -135 degrees around Z axis, then translates by (sqrt(2)/2, -sqrt(2)/2, 0).
@@ -145,68 +110,64 @@ void MyApp::createShapes() {
     */
 
     // Large blue triangle
-    std::unique_ptr<Triangle> t1 = std::make_unique<Triangle>(VaoId[0], glm::vec3((15.0 / 255), (130.0 / 255), (242.0 / 255)), MatrixId, ColorId);
-    t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -135.0f);
-    t1->translate(glm::vec3(std::sqrt(2) / 2, -std::sqrt(2) / 2, 0));
+    //std::unique_ptr<Triangle> t1 = std::make_unique<Triangle>(VaoId[0], glm::vec3((15.0 / 255), (130.0 / 255), (242.0 / 255)), MatrixId, ColorId);
+    //t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -135.0f);
+    //t1->translate(glm::vec3(std::sqrt(2) / 2, -std::sqrt(2) / 2, 0));
 
-    // Large magenta triangle
-    std::unique_ptr<Triangle> t2 = std::make_unique<Triangle>(VaoId[0], glm::vec3((205.0 / 255), (14.0 / 255), (102.0 / 255)), MatrixId, ColorId);
-    t2->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
+    //// Large magenta triangle
+    //std::unique_ptr<Triangle> t2 = std::make_unique<Triangle>(VaoId[0], glm::vec3((205.0 / 255), (14.0 / 255), (102.0 / 255)), MatrixId, ColorId);
+    //t2->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
 
-    // Medium purple triangle
-    std::unique_ptr<Triangle> t3 = std::make_unique<Triangle>(VaoId[0], glm::vec3((109.0 / 255), (59.0 / 255), (191.0 / 255)), MatrixId, ColorId);
-    t3->scale(glm::vec3(std::sqrt(2) / 2, std::sqrt(2) / 2, 0.0f));
-    t3->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 4, 0.0f));
+    //// Medium purple triangle
+    //std::unique_ptr<Triangle> t3 = std::make_unique<Triangle>(VaoId[0], glm::vec3((109.0 / 255), (59.0 / 255), (191.0 / 255)), MatrixId, ColorId);
+    //t3->scale(glm::vec3(std::sqrt(2) / 2, std::sqrt(2) / 2, 0.0f));
+    //t3->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 4, 0.0f));
 
-    // Small teal triangle
-    std::unique_ptr<Triangle> t4 = std::make_unique<Triangle>(VaoId[0], glm::vec3((0.0 / 255), (158.0 / 255), (166.0 / 255)), MatrixId, ColorId);
-    t4->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    t4->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
-    t4->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 2, 0.0f));
+    //// Small teal triangle
+    //std::unique_ptr<Triangle> t4 = std::make_unique<Triangle>(VaoId[0], glm::vec3((0.0 / 255), (158.0 / 255), (166.0 / 255)), MatrixId, ColorId);
+    //t4->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    //t4->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
+    //t4->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 2, 0.0f));
 
-    // Small orange triangle
-    std::unique_ptr<Triangle> t5 = std::make_unique<Triangle>(VaoId[0], glm::vec3((235.0 / 255), (71.0 / 255), (38.0 / 255)), MatrixId, ColorId);
-    t5->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    t5->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
-    t5->translate(glm::vec3(-sqrt(2) / 2 - 1.25f, 0.25f, 0.0f));
+    //// Small orange triangle
+    //std::unique_ptr<Triangle> t5 = std::make_unique<Triangle>(VaoId[0], glm::vec3((235.0 / 255), (71.0 / 255), (38.0 / 255)), MatrixId, ColorId);
+    //t5->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    //t5->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
+    //t5->translate(glm::vec3(-sqrt(2) / 2 - 1.25f, 0.25f, 0.0f));
 
-    // Green square
-    std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3((34.0 / 255), (171.0 / 255), (36.0 / 255)), MatrixId, ColorId);
-    s->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    s->translate(glm::vec3(-sqrt(2) / 2 - 0.75f, 0.25f, 0.0f));
+    //// Green square
+    //std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3((34.0 / 255), (171.0 / 255), (36.0 / 255)), MatrixId, ColorId);
+    //s->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    //s->translate(glm::vec3(-sqrt(2) / 2 - 0.75f, 0.25f, 0.0f));
 
-    // Orange parallelogram
-    std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3((253.0 / 255), (140.0 / 255), (0.0 / 255)), MatrixId, ColorId);
-    p->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    p->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
-    p->translate(glm::vec3(-sqrt(2) / 2 - 0.25f, 0.0f, 0.0f));
+    //// Orange parallelogram
+    //std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3((253.0 / 255), (140.0 / 255), (0.0 / 255)), MatrixId, ColorId);
+    //p->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    //p->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
+    //p->translate(glm::vec3(-sqrt(2) / 2 - 0.25f, 0.0f, 0.0f));
 
-    // Add all pieces to shapes array
-    this->shapes.push_back(std::move(t1));
-    this->shapes.push_back(std::move(t2));
-    this->shapes.push_back(std::move(t3));
-    this->shapes.push_back(std::move(t4));
-    this->shapes.push_back(std::move(t5));
-    this->shapes.push_back(std::move(s));
-    this->shapes.push_back(std::move(p));
+    //// Add all pieces to shapes array
+    //this->shapes.push_back(std::move(t1));
+    //this->shapes.push_back(std::move(t2));
+    //this->shapes.push_back(std::move(t3));
+    //this->shapes.push_back(std::move(t4));
+    //this->shapes.push_back(std::move(t5));
+    //this->shapes.push_back(std::move(s));
+    //this->shapes.push_back(std::move(p));
 
-    // Universal transformations applied to the entire "Sea Dinosaur"
-    for (auto& shape : shapes) {
-        shape->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-        shape->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -15.0f);
-        shape->translate(glm::vec3(0.25f, 0.0f, 0.0f));
-    }
+    //// Universal transformations applied to the entire "Sea Dinosaur"
+    //for (auto& shape : shapes) {
+    //    shape->scale(glm::vec3(0.5f, 0.5f, 0.0f));
+    //    shape->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -11.0f);
+    //    shape->translate(glm::vec3(0.25f, 0.0f, 0.0f));
+    //}
 }
 
 ////////////////////////////////////////////////////////////////////////// SCENE
 
 void MyApp::drawScene() {
     // Drawing directly in clip space
-    Shaders->bind();
-    for (auto& shape : shapes) {
-        shape->draw();
-    }
-    Shaders->unbind();
+    parallelogram->draw(glm::mat4(1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 ////////////////////////////////////////////////////////////////////// CALLBACKS
@@ -214,7 +175,7 @@ void MyApp::drawScene() {
 void MyApp::initCallback(GLFWwindow* win) {
     createBufferObjects();
     createShaderProgram();
-    createShapes();
+    createTransformations();
 }
 
 void MyApp::windowCloseCallback(GLFWwindow* win) { destroyBufferObjects(); }

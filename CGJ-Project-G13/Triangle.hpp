@@ -4,9 +4,8 @@
 #include "./Shape.hpp"
 
 class Triangle : public Shape {
-public:
-	Triangle(GLuint VAO, glm::vec3 color, GLint MatrixId, GLint ColorId, glm::mat4 transform = glm::mat4(1.0f));
-	void draw() override;
+	public:
+		Triangle(GLint MatrixId, GLint ColorId);
 };
 
 #endif /* TRIANGLE_HPP */
