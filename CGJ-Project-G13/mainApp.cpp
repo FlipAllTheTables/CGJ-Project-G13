@@ -91,76 +91,62 @@ void MyApp::destroyBufferObjects() {
 
 //////////////////////////////////////////////////////////////////// MATRICES
 
+std::vector<glm::mat4> matrices(7, glm::mat4(1.0f));
 
-
+/*
+ * The first transformation in code is the first transformation applied to the piece.
+ * Eg. the large blue triangle first rotates -135 degrees around Z axis, then translates by (sqrt(2)/2, -sqrt(2)/2, 0).
+ * This was done to make code easier to write and to understand, together with having one transformation per line.
+ * 
+ * To create the tangram shape, first step is to scale pieces appropriately, then rotate, then translate.
+ * This ensures that all the pieces are in the correct position relative to each other.
+ * 
+ * Once this is done, there is an additional scaling, rotation and translation done to all pieces equally ('for loop')
+ * Scaling and translation ensure all pieces fit cleanly in clipspace.
+ * The rotation tilts the entire "Sea Dinosaur" shape slightly upwards.
+ * These transformations are applied after individual pieces transformations, meaning they change the "Sea Dinosaur"
+ * shape rather than individual pieces.
+ */
 void MyApp::createTransformations() {
-    /*
-    The first transformation in code is the first transformation applied to a piece.
-    Eg. the large blue triangle first rotates -135 degrees around Z axis, then translates by (sqrt(2)/2, -sqrt(2)/2, 0).
-    This was done to make code easier to write and more intuitive.
 
-    To create the tangram shape, first step is to scale pieces appropriately, then rotate, then translate.
-    This ensures that all the pieces are in the correct position relative to each other.
-
-    Once this is done, there is an additional scaling, rotation and translation done to all pieces equally ('for loop')
-    Scaling and translation ensure all pieces fit cleanly in clipspace.
-    The rotation tilts the entire "Sea Dinosaur" shape slightly upwards.
-    These transformations are applied after individual pieces transformations, meaning they change the "Sea Dinosaur"
-    shape rather than individual pieces.
-    */
+    glm::mat4 I = glm::mat4(1.0f); // Identity matrix
 
     // Large blue triangle
-    //std::unique_ptr<Triangle> t1 = std::make_unique<Triangle>(VaoId[0], glm::vec3((15.0 / 255), (130.0 / 255), (242.0 / 255)), MatrixId, ColorId);
-    //t1->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -135.0f);
-    //t1->translate(glm::vec3(std::sqrt(2) / 2, -std::sqrt(2) / 2, 0));
+    matrices[0] = glm::rotate(I, glm::radians(-135.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * matrices[0];
+    matrices[0] = glm::translate(I, glm::vec3(std::sqrt(2) / 2, -sqrt(2) / 2, 0)) * matrices[0];
 
-    //// Large magenta triangle
-    //std::unique_ptr<Triangle> t2 = std::make_unique<Triangle>(VaoId[0], glm::vec3((205.0 / 255), (14.0 / 255), (102.0 / 255)), MatrixId, ColorId);
-    //t2->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
+    // Large magenta triangle
+    matrices[1] = glm::rotate(I, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * matrices[1];
 
-    //// Medium purple triangle
-    //std::unique_ptr<Triangle> t3 = std::make_unique<Triangle>(VaoId[0], glm::vec3((109.0 / 255), (59.0 / 255), (191.0 / 255)), MatrixId, ColorId);
-    //t3->scale(glm::vec3(std::sqrt(2) / 2, std::sqrt(2) / 2, 0.0f));
-    //t3->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 4, 0.0f));
+    // Medium purple triangle
+    matrices[2] = glm::scale(I, glm::vec3(std::sqrt(2) / 2, std::sqrt(2) / 2, 0.0f)) * matrices[2];
+    matrices[2] = glm::translate(I, glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 4, 0.0f)) * matrices[2];
 
-    //// Small teal triangle
-    //std::unique_ptr<Triangle> t4 = std::make_unique<Triangle>(VaoId[0], glm::vec3((0.0 / 255), (158.0 / 255), (166.0 / 255)), MatrixId, ColorId);
-    //t4->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    //t4->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 45.0f);
-    //t4->translate(glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 2, 0.0f));
+    // Small teal triangle
+    matrices[3] = glm::scale(I, glm::vec3(0.5f, 0.5f, 1.0f)) * matrices[3];
+    matrices[3] = glm::rotate(I, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * matrices[3];
+    matrices[3] = glm::translate(I, glm::vec3(-std::sqrt(2) / 4, -std::sqrt(2) / 2, 0.0f)) * matrices[3];
 
-    //// Small orange triangle
-    //std::unique_ptr<Triangle> t5 = std::make_unique<Triangle>(VaoId[0], glm::vec3((235.0 / 255), (71.0 / 255), (38.0 / 255)), MatrixId, ColorId);
-    //t5->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    //t5->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
-    //t5->translate(glm::vec3(-sqrt(2) / 2 - 1.25f, 0.25f, 0.0f));
+    // Small orange triangle
+    matrices[4] = glm::scale(I, glm::vec3(0.5f, 0.5f, 1.0f)) * matrices[4];
+    matrices[4] = glm::rotate(I, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))* matrices[4];
+    matrices[4] = glm::translate(I, glm::vec3(-sqrt(2) / 2 - 1.25f, 0.25f, 0.0f)) * matrices[4];
 
-    //// Green square
-    //std::unique_ptr<Square> s = std::make_unique<Square>(VaoId[1], glm::vec3((34.0 / 255), (171.0 / 255), (36.0 / 255)), MatrixId, ColorId);
-    //s->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    //s->translate(glm::vec3(-sqrt(2) / 2 - 0.75f, 0.25f, 0.0f));
+    // Green square
+    matrices[5] = glm::scale(I, glm::vec3(0.5f, 0.5f, 1.0f)) * matrices[5];
+    matrices[5] = glm::translate(I, glm::vec3(-sqrt(2) / 2 - 0.75f, 0.25f, 0.0f)) * matrices[5];
 
-    //// Orange parallelogram
-    //std::unique_ptr<Parallelogram> p = std::make_unique<Parallelogram>(VaoId[2], glm::vec3((253.0 / 255), (140.0 / 255), (0.0 / 255)), MatrixId, ColorId);
-    //p->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    //p->rotate(glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
-    //p->translate(glm::vec3(-sqrt(2) / 2 - 0.25f, 0.0f, 0.0f));
+    // Orange parallelogram
+    matrices[6] = glm::scale(I, glm::vec3(0.5f, 0.5f, 1.0f)) * matrices[6];
+    matrices[6] = glm::rotate(I, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * matrices[6];
+    matrices[6] = glm::translate(I, glm::vec3(-sqrt(2) / 2 - 0.25f, 0.0f, 0.0f)) * matrices[6];
 
-    //// Add all pieces to shapes array
-    //this->shapes.push_back(std::move(t1));
-    //this->shapes.push_back(std::move(t2));
-    //this->shapes.push_back(std::move(t3));
-    //this->shapes.push_back(std::move(t4));
-    //this->shapes.push_back(std::move(t5));
-    //this->shapes.push_back(std::move(s));
-    //this->shapes.push_back(std::move(p));
-
-    //// Universal transformations applied to the entire "Sea Dinosaur"
-    //for (auto& shape : shapes) {
-    //    shape->scale(glm::vec3(0.5f, 0.5f, 0.0f));
-    //    shape->rotate(glm::vec3(0.0f, 0.0f, 1.0f), -11.0f);
-    //    shape->translate(glm::vec3(0.25f, 0.0f, 0.0f));
-    //}
+    // Universal transformations applied to the entire figure
+    for (int i = 0; i < matrices.size(); i++) {
+        matrices[i] = glm::scale(I, glm::vec3(0.5f, 0.5f, 1.0f)) * matrices[i];
+        matrices[i] = glm::rotate(I, glm::radians(-11.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * matrices[i];
+        matrices[i] = glm::translate(I, glm::vec3(0.25f, 0.0f, 0.0f)) * matrices[i];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////// SCENE
@@ -168,7 +154,13 @@ void MyApp::createTransformations() {
 void MyApp::drawScene() {
     // Drawing directly in clip space
     Shaders->bind();
-    triangle->draw(glm::mat4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    triangle->draw(matrices[0], glm::vec4((15.0 / 255), (130.0 / 255), (242.0 / 255), 1.0f));       //Large blue triangle
+    triangle->draw(matrices[1], glm::vec4((205.0 / 255), (14.0 / 255), (102.0 / 255), 1.0f));       //Large magenta triangle
+    triangle->draw(matrices[2], glm::vec4((109.0 / 255), (59.0 / 255), (191.0 / 255), 1.0f));       //Medium purple triangle
+    triangle->draw(matrices[3], glm::vec4((0.0 / 255), (158.0 / 255), (166.0 / 255), 1.0f));        //Small teal triangle
+    triangle->draw(matrices[4], glm::vec4((235.0 / 255), (71.0 / 255), (38.0 / 255), 1.0f));        //Small orange triangle
+    square->draw(matrices[5], glm::vec4((34.0 / 255), (171.0 / 255), (36.0 / 255), 1.0f));          //Green square
+    parallelogram->draw(matrices[6], glm::vec4((253.0 / 255), (140.0 / 255), (0.0 / 255), 1.0f));   //Orange parallelogram
     Shaders->unbind();
 }
 
