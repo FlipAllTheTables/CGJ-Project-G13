@@ -167,14 +167,16 @@ void MyApp::createTransformations() {
 
 void MyApp::drawScene() {
     // Drawing directly in clip space
-    parallelogram->draw(glm::mat4(1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    Shaders->bind();
+    triangle->draw(glm::mat4(1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    Shaders->unbind();
 }
 
 ////////////////////////////////////////////////////////////////////// CALLBACKS
 
 void MyApp::initCallback(GLFWwindow* win) {
-    createBufferObjects();
     createShaderProgram();
+    createBufferObjects();
     createTransformations();
 }
 
